@@ -1,0 +1,79 @@
+*&---------------------------------------------------------------------*
+*& Report  ZTEST_AVL
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ztest_avl.
+
+DATA: gr_sapui5_viewer TYPE REF TO cl_gui_html_viewer.
+
+CALL SCREEN 9000.
+
+*&---------------------------------------------------------------------*
+*&      Form  PBO_9000_SET_STATUS
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM pbo_9000_set_status .
+
+  SET PF-STATUS '9000'.
+  SET TITLEBAR '9000' WITH 'Lanzador de aplicaciones'.
+
+ENDFORM.                    " PBO_9000_SET_STATUS
+*&---------------------------------------------------------------------*
+*&      Module  PBO_9000_OPEN_CONTAINER  OUTPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE pbo_9000_open_container OUTPUT.
+
+  PERFORM open_container.
+
+ENDMODULE.                 " PBO_9000_OPEN_CONTAINER  OUTPUT
+*&---------------------------------------------------------------------*
+*&      Form  OPEN_CONTAINER
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM open_container .
+
+  DATA: ls_params         TYPE tihttpnvp,
+        l_params          TYPE string,
+        l_url             TYPE string,
+        l_final_url(1024) TYPE c.
+
+  CREATE OBJECT gr_sapui5_viewer "
+     EXPORTING parent = cl_gui_custom_container=>screen0.
+
+  cl_http_ext_webapp=>create_url_for_bsp_application( EXPORTING bsp_application      = 'ZTEST'
+                                                                bsp_start_page       = 'Index.html'
+                                                                bsp_start_parameters = ls_params
+                                                      IMPORTING abs_url              = l_url ).
+
+  CONCATENATE l_url l_params INTO l_final_url.
+
+  gr_sapui5_viewer->show_url( EXPORTING url = l_final_url ).
+
+ENDFORM.                    "open_container
+*&---------------------------------------------------------------------*
+*&      Module  PAI_9000_USER_COMMAND  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE pai_9000_user_command INPUT.
+
+  CASE sy-ucomm.
+    WHEN 'BACK' OR 'EXIT' OR 'CANCEL'.
+      LEAVE TO SCREEN 0.
+  ENDCASE.
+
+ENDMODULE.                 " PAI_9000_USER_COMMAND  INPUT
